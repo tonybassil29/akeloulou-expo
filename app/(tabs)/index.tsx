@@ -154,7 +154,7 @@ export default function HomeScreen() {
       {selectedCategory === 'Toutes' && featured.length > 0 && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Recettes en vedette
+            Dernieres recettes
           </Text>
           <FlatList
             horizontal

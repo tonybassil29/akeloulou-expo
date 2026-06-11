@@ -59,7 +59,7 @@ export default function SuggestionScreen() {
       const sorted = [...recipesToSort];
       switch (sortBy) {
         case 'name':
-          return sorted.sort((a, b) => a.name.localeCompare(b.name));
+          return sorted.sort((a, b) => a.title.localeCompare(b.title));
         case 'date':
           return sorted.sort(
             (a, b) =>
@@ -68,10 +68,10 @@ export default function SuggestionScreen() {
         case 'difficulty':
           return sorted.sort((a, b) => {
             const order: Record<string, number> = { Facile: 1, Moyen: 2, Difficile: 3 };
-            return (order[a.difficulty] ?? 2) - (order[b.difficulty] ?? 2);
+            return (order[a.difficulty ?? ''] ?? 2) - (order[b.difficulty ?? ''] ?? 2);
           });
         case 'prep_time':
-          return sorted.sort((a, b) => a.prep_time - b.prep_time);
+          return sorted.sort((a, b) => (a.prep_time ?? 0) - (b.prep_time ?? 0));
         default:
           return sorted;
       }

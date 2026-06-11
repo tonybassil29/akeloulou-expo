@@ -19,7 +19,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onPress }) => {
       style={[styles.card, { backgroundColor: colors.card }]}
       onPress={onPress}
       activeOpacity={0.7}
-      accessibilityLabel={`Recette : ${recipe.name}`}
+      accessibilityLabel={`Recette : ${recipe.title}`}
       accessibilityHint="Appuyez pour voir les détails de la recette"
       accessibilityRole="button"
     >
@@ -28,16 +28,16 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onPress }) => {
         style={styles.image}
         contentFit="cover"
         transition={200}
-        accessibilityLabel={`Image de ${recipe.name}`}
+        accessibilityLabel={`Image de ${recipe.title}`}
       />
       <View style={styles.content}>
         <Text style={[styles.name, { color: colors.text }]} numberOfLines={2}>
-          {recipe.name}
+          {recipe.title}
         </Text>
         <View style={styles.badges}>
           <View style={[styles.categoryBadge, { backgroundColor: colors.primary + '20' }]}>
             <Text style={[styles.categoryText, { color: colors.primary }]}>
-              {recipe.category}
+              {recipe.category.charAt(0).toUpperCase() + recipe.category.slice(1)}
             </Text>
           </View>
         </View>

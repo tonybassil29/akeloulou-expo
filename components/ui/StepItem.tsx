@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { Colors } from '../../constants/Colors';
 
 interface StepItemProps {
-  step: string;
+  instruction: string;
   index: number;
 }
 
-export const StepItem: React.FC<StepItemProps> = ({ step, index }) => {
+export const StepItem: React.FC<StepItemProps> = ({ instruction, index }) => {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
@@ -16,7 +16,7 @@ export const StepItem: React.FC<StepItemProps> = ({ step, index }) => {
       <View style={[styles.badge, { backgroundColor: colors.primary }]}>
         <Text style={styles.badgeText}>{index + 1}</Text>
       </View>
-      <Text style={[styles.stepText, { color: colors.text }]}>{step}</Text>
+      <Text style={[styles.stepText, { color: colors.text }]}>{instruction}</Text>
     </View>
   );
 };

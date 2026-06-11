@@ -46,7 +46,7 @@ export default function FrigoScreen() {
     const matched = recipes.filter((recipe) =>
       ingredients.every((ingredient) =>
         recipe.ingredients.some((ri) =>
-          ri.name.toLowerCase().includes(ingredient)
+          ri.toLowerCase().includes(ingredient)
         )
       )
     );

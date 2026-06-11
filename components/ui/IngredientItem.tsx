@@ -1,10 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { Colors } from '../../constants/Colors';
-import { Ingredient } from '../../types';
 
 interface IngredientItemProps {
-  ingredient: Ingredient;
+  ingredient: string;
 }
 
 export const IngredientItem: React.FC<IngredientItemProps> = ({ ingredient }) => {
@@ -13,10 +12,7 @@ export const IngredientItem: React.FC<IngredientItemProps> = ({ ingredient }) =>
 
   return (
     <View style={[styles.row, { borderBottomColor: colors.border }]}>
-      <Text style={[styles.name, { color: colors.text }]}>{ingredient.name}</Text>
-      <Text style={[styles.quantity, { color: colors.textSecondary }]}>
-        {ingredient.quantity} {ingredient.unit}
-      </Text>
+      <Text style={[styles.name, { color: colors.text }]}>{ingredient}</Text>
     </View>
   );
 };

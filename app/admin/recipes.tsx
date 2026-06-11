@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import * as AuthService from '../../services/AuthService';
-import * as RecipeService from '../../services/RecipeService';
+import { getAllRecipes, deleteRecipe } from '../../services/RecipeService';
 import { Recipe } from '../../types';
 import { Colors } from '../../constants/Colors';
 
@@ -37,7 +37,7 @@ export default function AdminRecipesScreen() {
       const q = searchQuery.toLowerCase();
       const filtered = recipes.filter(
         (r) =>
-          r.name.toLowerCase().includes(q) ||
+          r.title.toLowerCase().includes(q) ||
           r.category.toLowerCase().includes(q)
       );
       setFilteredRecipes(filtered);
@@ -59,7 +59,7 @@ export default function AdminRecipesScreen() {
     try {
       setLoading(true);
       setError('');
-      const data = await RecipeService.getRecipes();
+      const data = await getAllRecipes();
       setRecipes(data);
       setFilteredRecipes(data);
     } catch {
@@ -73,7 +73,7 @@ export default function AdminRecipesScreen() {
     (recipe: Recipe) => {
       Alert.alert(
         'Supprimer la recette',
-        `Voulez-vous vraiment supprimer "${recipe.name}" ?`,
+        `Voulez-vous vraiment supprimer "${recipe.title}" ?`,
         [
           { text: 'Annuler', style: 'cancel' },
           {
@@ -81,7 +81,7 @@ export default function AdminRecipesScreen() {
             style: 'destructive',
             onPress: async () => {
               try {
-                await RecipeService.deleteRecipe(recipe.id);
+                await deleteRecipe(recipe.id);
                 setRecipes((prev) => prev.filter((r) => r.id !== recipe.id));
               } catch {
                 Alert.alert('Erreur', 'Impossible de supprimer la recette');
@@ -102,24 +102,19 @@ export default function AdminRecipesScreen() {
           style={styles.recipeImage}
           contentFit="cover"
           transition={200}
-          accessibilityLabel={`Image de ${item.name}`}
+          accessibilityLabel={`Image de ${item.title}`}
         />
         <View style={styles.recipeInfo}>
           <Text style={[styles.recipeName, { color: colors.text }]} numberOfLines={1}>
-            {item.name}
+            {item.title}
           </Text>
           <Text style={[styles.recipeCategory, { color: colors.textSecondary }]}>
-            {item.category}
+            {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
           </Text>
           <View style={styles.recipeBadges}>
-            {item.is_featured && (
+            {item.hidden && (
               <View style={[styles.badge, { backgroundColor: '#FFD700' + '20' }]}>
-                <Text style={[styles.badgeText, { color: '#FFD700' }]}>Vedette</Text>
-              </View>
-            )}
-            {item.is_premium && (
-              <View style={[styles.badge, { backgroundColor: '#9B59B6' + '20' }]}>
-                <Text style={[styles.badgeText, { color: '#9B59B6' }]}>Premium</Text>
+                <Text style={[styles.badgeText, { color: '#FFD700' }]}>Masquee</Text>
               </View>
             )}
           </View>
@@ -128,7 +123,7 @@ export default function AdminRecipesScreen() {
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: colors.primary + '20' }]}
             onPress={() => router.push({ pathname: '/admin/edit', params: { id: item.id } })}
-            accessibilityLabel={`Modifier ${item.name}`}
+            accessibilityLabel={`Modifier ${item.title}`}
             accessibilityRole="button"
           >
             <Ionicons name="create-outline" size={20} color={colors.primary} />
@@ -136,7 +131,7 @@ export default function AdminRecipesScreen() {
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: colors.error + '20' }]}
             onPress={() => handleDelete(item)}
-            accessibilityLabel={`Supprimer ${item.name}`}
+            accessibilityLabel={`Supprimer ${item.title}`}
             accessibilityRole="button"
           >
             <Ionicons name="trash-outline" size={20} color={colors.error} />

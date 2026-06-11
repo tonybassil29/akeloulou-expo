@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   useColorScheme,
-  Linking,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,12 +31,6 @@ export default function RecipeDetailScreen() {
       toggleFavorite(recipe.id);
     }
   }, [recipe, toggleFavorite]);
-
-  const handleOpenVideo = useCallback(() => {
-    if (recipe?.video_url) {
-      Linking.openURL(recipe.video_url).catch(() => {});
-    }
-  }, [recipe?.video_url]);
 
   if (loading) return <LoadingScreen />;
   if (error) return <ErrorView message={error} onRetry={refetch} />;
@@ -80,20 +73,26 @@ export default function RecipeDetailScreen() {
         style={styles.heroImage}
         contentFit="cover"
         transition={300}
-        accessibilityLabel={`Image de ${recipe.name}`}
+        accessibilityLabel={`Image de ${recipe.title}`}
       />
 
       <View style={[styles.content, { backgroundColor: colors.background }]}>
         <View style={styles.titleRow}>
-          <Text style={[styles.title, { color: colors.text }]}>{recipe.name}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{recipe.title}</Text>
         </View>
 
         <View style={styles.badges}>
           <View style={[styles.categoryBadge, { backgroundColor: colors.primary + '20' }]}>
             <Text style={[styles.badgeText, { color: colors.primary }]}>
-              {recipe.category}
+              {recipe.category.charAt(0).toUpperCase() + recipe.category.slice(1)}
             </Text>
           </View>
+          {recipe.country ? (
+            <View style={[styles.categoryBadge, { backgroundColor: colors.secondary + '20' }]}>
+              <Ionicons name="globe-outline" size={14} color={colors.secondary} />
+              <Text style={[styles.badgeText, { color: colors.secondary }]}>{recipe.country}</Text>
+            </View>
+          ) : null}
           <View style={[styles.difficultyBadge, { backgroundColor: difficultyColor + '20' }]}>
             <Ionicons name="speedometer-outline" size={14} color={difficultyColor} />
             <Text style={[styles.badgeText, { color: difficultyColor }]}>
@@ -142,38 +141,61 @@ export default function RecipeDetailScreen() {
             <View key={index} style={styles.ingredientRow}>
               <View style={[styles.ingredientBullet, { backgroundColor: colors.primary }]} />
               <Text style={[styles.ingredientText, { color: colors.text }]}>
-                {ingredient.quantity} {ingredient.unit} {ingredient.name}
+                {ingredient}
               </Text>
             </View>
           ))}
         </View>
 
+        {recipe.spices && recipe.spices.length > 0 && (
+          <>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Epices
+            </Text>
+            <View style={[styles.ingredientsCard, { backgroundColor: colors.card }]}>
+              {recipe.spices.map((spice, index) => (
+                <View key={index} style={styles.ingredientRow}>
+                  <View style={[styles.ingredientBullet, { backgroundColor: colors.secondary }]} />
+                  <Text style={[styles.ingredientText, { color: colors.text }]}>
+                    {spice}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        {recipe.equipment && recipe.equipment.length > 0 && (
+          <>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Equipement
+            </Text>
+            <View style={[styles.ingredientsCard, { backgroundColor: colors.card }]}>
+              {recipe.equipment.map((eq, index) => (
+                <View key={index} style={styles.ingredientRow}>
+                  <View style={[styles.ingredientBullet, { backgroundColor: '#FFA500' }]} />
+                  <Text style={[styles.ingredientText, { color: colors.text }]}>
+                    {eq.name}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           Preparation
         </Text>
         <View style={[styles.stepsCard, { backgroundColor: colors.card }]}>
-          {recipe.steps.map((step, index) => (
+          {recipe.instructions.split('\n').filter((line) => line.trim()).map((instruction, index) => (
             <View key={index} style={styles.stepRow}>
               <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}>
                 <Text style={styles.stepNumberText}>{index + 1}</Text>
               </View>
-              <Text style={[styles.stepText, { color: colors.text }]}>{step}</Text>
+              <Text style={[styles.stepText, { color: colors.text }]}>{instruction}</Text>
             </View>
           ))}
         </View>
-
-        {recipe.video_url && (
-          <TouchableOpacity
-            style={[styles.videoButton, { backgroundColor: colors.primary }]}
-            onPress={handleOpenVideo}
-            accessibilityLabel="Voir la video"
-            accessibilityHint="Ouvre la video de preparation"
-            accessibilityRole="link"
-          >
-            <Ionicons name="play-circle" size={24} color="#FFFFFF" />
-            <Text style={styles.videoButtonText}>Voir la video</Text>
-          </TouchableOpacity>
-        )}
 
         {recipe.tags && recipe.tags.length > 0 && (
           <View style={styles.tagsContainer}>
@@ -346,19 +368,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     flex: 1,
-  },
-  videoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
-    gap: 8,
-  },
-  videoButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
   },
   tagsContainer: {
     flexDirection: 'row',

@@ -151,14 +151,14 @@ export default function MenuScreen() {
                 <TouchableOpacity
                   style={styles.mealRecipeContent}
                   onPress={() => router.push(`/recipe/${recipe.id}`)}
-                  accessibilityLabel={`Voir ${recipe.name}`}
+                  accessibilityLabel={`Voir ${recipe.title}`}
                   accessibilityRole="button"
                 >
                   <Text
                     style={[styles.mealRecipeName, { color: colors.text }]}
                     numberOfLines={1}
                   >
-                    {recipe.name}
+                    {recipe.title}
                   </Text>
                   <Text style={[styles.mealRecipeMeta, { color: colors.textSecondary }]}>
                     {recipe.prep_time} min · {recipe.difficulty}
@@ -166,7 +166,7 @@ export default function MenuScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => removeRecipeFromSlot(day, meal)}
-                  accessibilityLabel={`Supprimer ${recipe.name}`}
+                  accessibilityLabel={`Supprimer ${recipe.title}`}
                   accessibilityRole="button"
                 >
                   <Ionicons name="close-circle" size={20} color={colors.error} />

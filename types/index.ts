@@ -1,58 +1,69 @@
-export interface Ingredient {
-  name: string;
-  quantity: string;
-  unit: string;
-  image_url?: string;
-}
-
 export interface Recipe {
   id: string;
-  name: string;
-  description: string;
+  title: string;
+  description: string | null;
   image_url: string;
   category: string;
-  prep_time: number;
-  cook_time: number;
+  prep_time: number | null;
+  cook_time: number | null;
   servings: number;
-  difficulty: string;
-  ingredients: Ingredient[];
-  steps: string[];
-  video_url?: string;
+  difficulty: string | null;
+  ingredients: string[];
+  instructions: string;
+  country: string | null;
+  hidden: boolean;
+  is_secondary: boolean;
+  show_portions: boolean;
+  spices: string[];
+  equipment: { name: string; image_url: string }[];
+  related_recipes: { id: string; title: string }[] | null;
+  tags: string[];
   created_at: string;
   updated_at: string;
-  is_featured: boolean;
-  is_premium: boolean;
-  tags: string[];
 }
 
 export interface GalleryImage {
   id: string;
-  image_url: string;
-  caption: string;
-  category: string;
+  url: string;
+  recipe_id: string | null;
+  name: string | null;
   created_at: string;
+}
+
+export interface Settings {
+  theme: 'light' | 'dark' | 'system';
+  language: string;
+}
+
+export interface AdminCredentials {
+  username: string;
+  password: string;
 }
 
 export interface MenuSlot {
   day: string;
-  meal: 'petit-dejeuner' | 'dejeuner' | 'diner';
+  meal: string;
   recipeId?: string;
   recipe?: Recipe;
 }
 
 export interface RecipeFormData {
-  name: string;
+  title: string;
   description: string;
   image_url: string;
   category: string;
-  prep_time: number;
-  cook_time: number;
+  prep_time: number | null;
+  cook_time: number | null;
   servings: number;
-  difficulty: string;
-  ingredients: Ingredient[];
-  steps: string[];
-  video_url?: string;
-  is_featured: boolean;
-  is_premium: boolean;
+  difficulty: string | null;
+  ingredients: string[];
+  instructions: string;
+  country: string | null;
+  hidden: boolean;
+  is_secondary: boolean;
+  show_portions: boolean;
+  spices: string[];
+  equipment: { name: string; image_url: string }[];
+  related_recipes: { id: string; title: string }[] | null;
   tags: string[];
 }

@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
 import { GalleryImage } from '../types';
-import {
-  getGalleryImages,
-  getGalleryImagesByCategory,
-} from '../services/GalleryService';
+import { getGalleryImages } from '../services/GalleryService';
 
 interface UseGalleryResult {
   images: GalleryImage[];
@@ -12,7 +9,7 @@ interface UseGalleryResult {
   refetch: () => void;
 }
 
-export function useGallery(category: string = 'Toutes'): UseGalleryResult {
+export function useGallery(): UseGalleryResult {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,10 +18,7 @@ export function useGallery(category: string = 'Toutes'): UseGalleryResult {
     setLoading(true);
     setError(null);
     try {
-      const data =
-        category === 'Toutes'
-          ? await getGalleryImages()
-          : await getGalleryImagesByCategory(category);
+      const data = await getGalleryImages();
       setImages(data);
     } catch (err: any) {
       setError(err.message ?? 'Erreur lors du chargement de la galerie');
@@ -35,7 +29,7 @@ export function useGallery(category: string = 'Toutes'): UseGalleryResult {
 
   useEffect(() => {
     fetchImages();
-  }, [category]);
+  }, []);
 
   return { images, loading, error, refetch: fetchImages };
 }

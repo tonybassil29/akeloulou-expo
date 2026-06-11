@@ -1,8 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   FlatList,
   TouchableOpacity,
   StyleSheet,
@@ -10,9 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
-import { CATEGORIES } from '../../constants/Config';
 import { GalleryImage } from '../../types';
 import { useGallery } from '../../hooks/useGallery';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
@@ -22,37 +19,31 @@ import { EmptyState } from '../../components/ui/EmptyState';
 export default function GalleryScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
-  const [selectedCategory, setSelectedCategory] = useState('Toutes');
-  const { images, loading, error, refetch } = useGallery(selectedCategory);
-
-  const filteredImages =
-    selectedCategory === 'Toutes'
-      ? images
-      : images.filter((img) => img.category === selectedCategory);
+  const { images, loading, error, refetch } = useGallery();
 
   const renderItem = useCallback(
     ({ item }: { item: GalleryImage }) => (
       <TouchableOpacity
         style={[styles.imageCard, { backgroundColor: colors.card }]}
         activeOpacity={0.8}
-        accessibilityLabel={item.caption || 'Image de galerie'}
+        accessibilityLabel={item.name ?? 'Image de galerie'}
         accessibilityHint="Appuyez pour agrandir"
         accessibilityRole="imagebutton"
       >
         <Image
-          source={{ uri: item.image_url }}
+          source={{ uri: item.url }}
           style={styles.image}
           contentFit="cover"
           transition={200}
-          accessibilityLabel={item.caption}
+          accessibilityLabel={item.name ?? 'Image de galerie'}
         />
-        {item.caption ? (
+        {item.name ? (
           <View style={[styles.captionContainer, { backgroundColor: colors.card }]}>
             <Text
               style={[styles.captionText, { color: colors.text }]}
               numberOfLines={2}
             >
-              {item.caption}
+              {item.name}
             </Text>
           </View>
         ) : null}
@@ -73,59 +64,14 @@ export default function GalleryScreen() {
         </Text>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterContainer}
-      >
-        {['Toutes', ...CATEGORIES.filter((c) => c !== 'Toutes')].map(
-          (category) => (
-            <TouchableOpacity
-              key={category}
-              style={[
-                styles.filterChip,
-                {
-                  backgroundColor:
-                    selectedCategory === category
-                      ? colors.primary
-                      : colors.card,
-                  borderColor:
-                    selectedCategory === category
-                      ? colors.primary
-                      : colors.border,
-                },
-              ]}
-              onPress={() => setSelectedCategory(category)}
-              accessibilityLabel={`Filtrer par ${category}`}
-              accessibilityRole="button"
-              accessibilityState={{ selected: selectedCategory === category }}
-            >
-              <Text
-                style={[
-                  styles.filterText,
-                  {
-                    color:
-                      selectedCategory === category
-                        ? '#FFFFFF'
-                        : colors.text,
-                  },
-                ]}
-              >
-                {category}
-              </Text>
-            </TouchableOpacity>
-          )
-        )}
-      </ScrollView>
-
-      {filteredImages.length === 0 ? (
+      {images.length === 0 ? (
         <EmptyState
           icon="images-outline"
           message="Aucune image dans cette catégorie"
         />
       ) : (
         <FlatList
-          data={filteredImages}
+          data={images}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           numColumns={2}
@@ -160,21 +106,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     marginTop: 4,
-  },
-  filterContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
-  },
-  filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: '600',
   },
   grid: {
     paddingHorizontal: 12,

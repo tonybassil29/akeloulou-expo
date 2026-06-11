@@ -20,28 +20,28 @@ import * as AuthService from '../../services/AuthService';
 import * as RecipeService from '../../services/RecipeService';
 import * as CloudinaryService from '../../services/CloudinaryService';
 import { CATEGORIES, DIFFICULTIES } from '../../constants/Config';
-import { Ingredient, RecipeFormData } from '../../types';
+import { RecipeFormData } from '../../types';
 import { Colors } from '../../constants/Colors';
 
 export default function AdminAddScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
-  const [name, setName] = useState('');
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [prepTime, setPrepTime] = useState('');
   const [cookTime, setCookTime] = useState('');
   const [servings, setServings] = useState('');
   const [difficulty, setDifficulty] = useState('');
-  const [ingredients, setIngredients] = useState<Ingredient[]>([
-    { name: '', quantity: '', unit: '' },
-  ]);
-  const [steps, setSteps] = useState<string[]>(['']);
+  const [ingredients, setIngredients] = useState<string[]>(['']);
+  const [instructions, setInstructions] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [country, setCountry] = useState('');
+  const [spices, setSpices] = useState('');
   const [tags, setTags] = useState('');
+  const [showPortions, setShowPortions] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -61,7 +61,7 @@ export default function AdminAddScreen() {
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!name.trim()) newErrors.name = 'Nom requis';
+    if (!title.trim()) newErrors.title = 'Titre requis';
     if (!description.trim()) newErrors.description = 'Description requise';
     if (!category) newErrors.category = 'Categorie requise';
     if (!prepTime) newErrors.prepTime = 'Temps de preparation requis';
@@ -69,10 +69,9 @@ export default function AdminAddScreen() {
     if (!servings) newErrors.servings = 'Portions requises';
     if (!difficulty) newErrors.difficulty = 'Difficulte requise';
     if (!imageUrl) newErrors.imageUrl = 'Image requise';
-    const validIngredients = ingredients.filter((i) => i.name.trim());
+    const validIngredients = ingredients.filter((i) => i.trim());
     if (validIngredients.length === 0) newErrors.ingredients = 'Au moins un ingredient requis';
-    const validSteps = steps.filter((s) => s.trim());
-    if (validSteps.length === 0) newErrors.steps = 'Au moins une etape requise';
+    if (!instructions.trim()) newErrors.instructions = 'Instructions requises';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -99,7 +98,7 @@ export default function AdminAddScreen() {
   };
 
   const addIngredient = () => {
-    setIngredients([...ingredients, { name: '', quantity: '', unit: '' }]);
+    setIngredients([...ingredients, '']);
   };
 
   const removeIngredient = (index: number) => {
@@ -108,26 +107,10 @@ export default function AdminAddScreen() {
     }
   };
 
-  const updateIngredient = (index: number, field: keyof Ingredient, value: string) => {
+  const updateIngredient = (index: number, value: string) => {
     const updated = [...ingredients];
-    updated[index] = { ...updated[index], [field]: value };
-    setIngredients(updated);
-  };
-
-  const addStep = () => {
-    setSteps([...steps, '']);
-  };
-
-  const removeStep = (index: number) => {
-    if (steps.length > 1) {
-      setSteps(steps.filter((_, i) => i !== index));
-    }
-  };
-
-  const updateStep = (index: number, value: string) => {
-    const updated = [...steps];
     updated[index] = value;
-    setSteps(updated);
+    setIngredients(updated);
   };
 
   const handleSubmit = async () => {
@@ -139,7 +122,7 @@ export default function AdminAddScreen() {
     setSubmitting(true);
     try {
       const recipeData: RecipeFormData = {
-        name: name.trim(),
+        title: title.trim(),
         description: description.trim(),
         image_url: imageUrl,
         category,
@@ -147,10 +130,15 @@ export default function AdminAddScreen() {
         cook_time: Number(cookTime),
         servings: Number(servings),
         difficulty,
-        ingredients: ingredients.filter((i) => i.name.trim()),
-        steps: steps.filter((s) => s.trim()),
-        is_featured: isFeatured,
-        is_premium: isPremium,
+        ingredients: ingredients.filter((i) => i.trim()),
+        instructions: instructions.trim(),
+        hidden,
+        country: country.trim() || null,
+        is_secondary: false,
+        show_portions: showPortions,
+        spices: spices ? spices.split(',').map((s) => s.trim()).filter((s) => s) : [],
+        equipment: [],
+        related_recipes: null,
         tags: tags
           .split(',')
           .map((t) => t.trim())
@@ -183,16 +171,16 @@ export default function AdminAddScreen() {
       </View>
 
       <View style={[styles.formGroup, { backgroundColor: colors.card }]}>
-        <Text style={[styles.label, { color: colors.text }]}>Nom *</Text>
+        <Text style={[styles.label, { color: colors.text }]}>Titre *</Text>
         <TextInput
-          style={[styles.input, { color: colors.text, borderColor: errors.name ? colors.error : colors.border, backgroundColor: colors.background }]}
-          placeholder="Nom de la recette"
+          style={[styles.input, { color: colors.text, borderColor: errors.title ? colors.error : colors.border, backgroundColor: colors.background }]}
+          placeholder="Titre de la recette"
           placeholderTextColor={colors.textSecondary}
-          value={name}
-          onChangeText={(t) => { setName(t); setErrors((e) => ({ ...e, name: '' })); }}
-          accessibilityLabel="Nom de la recette"
+          value={title}
+          onChangeText={(t) => { setTitle(t); setErrors((e) => ({ ...e, title: '' })); }}
+          accessibilityLabel="Titre de la recette"
         />
-        {errors.name ? <Text style={[styles.errorText, { color: colors.error }]}>{errors.name}</Text> : null}
+        {errors.title ? <Text style={[styles.errorText, { color: colors.error }]}>{errors.title}</Text> : null}
       </View>
 
       <View style={[styles.formGroup, { backgroundColor: colors.card }]}>
@@ -338,28 +326,12 @@ export default function AdminAddScreen() {
         {ingredients.map((ingredient, index) => (
           <View key={index} style={styles.dynamicRow}>
             <TextInput
-              style={[styles.ingredientName, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-              placeholder="Nom"
+              style={[styles.ingredientInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+              placeholder="300g de farine"
               placeholderTextColor={colors.textSecondary}
-              value={ingredient.name}
-              onChangeText={(v) => updateIngredient(index, 'name', v)}
-              accessibilityLabel={`Ingredient ${index + 1} nom`}
-            />
-            <TextInput
-              style={[styles.ingredientQty, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-              placeholder="Qte"
-              placeholderTextColor={colors.textSecondary}
-              value={ingredient.quantity}
-              onChangeText={(v) => updateIngredient(index, 'quantity', v)}
-              accessibilityLabel={`Ingredient ${index + 1} quantite`}
-            />
-            <TextInput
-              style={[styles.ingredientUnit, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-              placeholder="Unite"
-              placeholderTextColor={colors.textSecondary}
-              value={ingredient.unit}
-              onChangeText={(v) => updateIngredient(index, 'unit', v)}
-              accessibilityLabel={`Ingredient ${index + 1} unite`}
+              value={ingredient}
+              onChangeText={(v) => updateIngredient(index, v)}
+              accessibilityLabel={`Ingredient ${index + 1}`}
             />
             {ingredients.length > 1 && (
               <TouchableOpacity onPress={() => removeIngredient(index)} accessibilityLabel={`Supprimer ingredient ${index + 1}`}>
@@ -372,32 +344,18 @@ export default function AdminAddScreen() {
       </View>
 
       <View style={[styles.formGroup, { backgroundColor: colors.card }]}>
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.label, { color: colors.text }]}>Etapes *</Text>
-          <TouchableOpacity onPress={addStep} accessibilityLabel="Ajouter une etape" accessibilityRole="button">
-            <Ionicons name="add-circle" size={24} color={colors.primary} />
-          </TouchableOpacity>
-        </View>
-        {steps.map((step, index) => (
-          <View key={index} style={styles.stepRow}>
-            <Text style={[styles.stepNumber, { color: colors.primary }]}>{index + 1}.</Text>
-            <TextInput
-              style={[styles.stepInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-              placeholder={`Etape ${index + 1}`}
-              placeholderTextColor={colors.textSecondary}
-              value={step}
-              onChangeText={(v) => updateStep(index, v)}
-              multiline
-              accessibilityLabel={`Etape ${index + 1}`}
-            />
-            {steps.length > 1 && (
-              <TouchableOpacity onPress={() => removeStep(index)} accessibilityLabel={`Supprimer etape ${index + 1}`}>
-                <Ionicons name="remove-circle" size={22} color={colors.error} />
-              </TouchableOpacity>
-            )}
-          </View>
-        ))}
-        {errors.steps ? <Text style={[styles.errorText, { color: colors.error }]}>{errors.steps}</Text> : null}
+        <Text style={[styles.label, { color: colors.text }]}>Instructions *</Text>
+        <TextInput
+          style={[styles.textArea, { color: colors.text, borderColor: errors.instructions ? colors.error : colors.border, backgroundColor: colors.background }]}
+          placeholder="Ecrivez chaque etape sur une nouvelle ligne"
+          placeholderTextColor={colors.textSecondary}
+          value={instructions}
+          onChangeText={(t) => { setInstructions(t); setErrors((e) => ({ ...e, instructions: '' })); }}
+          multiline
+          numberOfLines={8}
+          accessibilityLabel="Instructions de la recette"
+        />
+        {errors.instructions ? <Text style={[styles.errorText, { color: colors.error }]}>{errors.instructions}</Text> : null}
       </View>
 
       <View style={[styles.formGroup, { backgroundColor: colors.card }]}>
@@ -427,13 +385,37 @@ export default function AdminAddScreen() {
 
       <View style={[styles.formGroup, { backgroundColor: colors.card }]}>
         <View style={styles.switchRow}>
-          <Text style={[styles.label, { color: colors.text }]}>Recette vedette</Text>
-          <Switch value={isFeatured} onValueChange={setIsFeatured} trackColor={{ false: colors.border, true: colors.primary }} thumbColor="#FFFFFF" accessibilityLabel="Recette vedette" />
+          <Text style={[styles.label, { color: colors.text }]}>Masquee</Text>
+          <Switch value={hidden} onValueChange={setHidden} trackColor={{ false: colors.border, true: colors.error }} thumbColor="#FFFFFF" accessibilityLabel="Masquer la recette" />
         </View>
         <View style={styles.switchRow}>
-          <Text style={[styles.label, { color: colors.text }]}>Recette premium</Text>
-          <Switch value={isPremium} onValueChange={setIsPremium} trackColor={{ false: colors.border, true: colors.primary }} thumbColor="#FFFFFF" accessibilityLabel="Recette premium" />
+          <Text style={[styles.label, { color: colors.text }]}>Afficher les portions</Text>
+          <Switch value={showPortions} onValueChange={setShowPortions} trackColor={{ false: colors.border, true: colors.primary }} thumbColor="#FFFFFF" accessibilityLabel="Afficher les portions" />
         </View>
+      </View>
+
+      <View style={[styles.formGroup, { backgroundColor: colors.card }]}>
+        <Text style={[styles.label, { color: colors.text }]}>Pays</Text>
+        <TextInput
+          style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+          placeholder="Ex: Liban"
+          placeholderTextColor={colors.textSecondary}
+          value={country}
+          onChangeText={setCountry}
+          accessibilityLabel="Pays d'origine"
+        />
+      </View>
+
+      <View style={[styles.formGroup, { backgroundColor: colors.card }]}>
+        <Text style={[styles.label, { color: colors.text }]}>Epices</Text>
+        <TextInput
+          style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+          placeholder="Epices separees par des virgules"
+          placeholderTextColor={colors.textSecondary}
+          value={spices}
+          onChangeText={setSpices}
+          accessibilityLabel="Epices separees par des virgules"
+        />
       </View>
 
       <View style={[styles.formGroup, { backgroundColor: colors.card }]}>
@@ -548,51 +530,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 6,
   },
-  ingredientName: {
-    flex: 3,
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    height: 38,
-    fontSize: 13,
-  },
-  ingredientQty: {
-    flex: 1.5,
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    height: 38,
-    fontSize: 13,
-  },
-  ingredientUnit: {
-    flex: 1.5,
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    height: 38,
-    fontSize: 13,
-  },
-  stepRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 6,
-    marginTop: 6,
-  },
-  stepNumber: {
-    fontSize: 14,
-    fontWeight: '700',
-    paddingTop: 10,
-    width: 20,
-  },
-  stepInput: {
+  ingredientInput: {
     flex: 1,
     borderWidth: 1,
     borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    fontSize: 14,
-    minHeight: 38,
-    textAlignVertical: 'top',
+    paddingHorizontal: 8,
+    height: 38,
+    fontSize: 13,
   },
   imagePicker: {
     borderWidth: 1,

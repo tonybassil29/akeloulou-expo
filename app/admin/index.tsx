@@ -12,15 +12,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as AuthService from '../../services/AuthService';
-import * as RecipeService from '../../services/RecipeService';
+import { getAllRecipes } from '../../services/RecipeService';
 import * as GalleryService from '../../services/GalleryService';
 import { Colors } from '../../constants/Colors';
 
 interface Stats {
   totalRecipes: number;
   totalImages: number;
-  featured: number;
-  premium: number;
+  hidden: number;
 }
 
 export default function AdminDashboardScreen() {
@@ -50,15 +49,14 @@ export default function AdminDashboardScreen() {
       setError('');
 
       const [recipes, images] = await Promise.all([
-        RecipeService.getRecipes(),
+        getAllRecipes(),
         GalleryService.getGalleryImages(),
       ]);
 
       setStats({
         totalRecipes: recipes.length,
         totalImages: images.length,
-        featured: recipes.filter((r) => r.is_featured).length,
-        premium: recipes.filter((r) => r.is_premium).length,
+        hidden: recipes.filter((r) => r.hidden).length,
       });
     } catch {
       setError('Erreur lors du chargement des statistiques');
@@ -156,21 +154,11 @@ export default function AdminDashboardScreen() {
 
           <View style={[styles.statCard, { backgroundColor: colors.card }]}>
             <View style={[styles.statIcon, { backgroundColor: '#FFD700' + '20' }]}>
-              <Ionicons name="star-outline" size={24} color="#FFD700" />
+              <Ionicons name="eye-off-outline" size={24} color="#FFD700" />
             </View>
-            <Text style={[styles.statValue, { color: colors.text }]}>{stats.featured}</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{stats.hidden}</Text>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Vedettes
-            </Text>
-          </View>
-
-          <View style={[styles.statCard, { backgroundColor: colors.card }]}>
-            <View style={[styles.statIcon, { backgroundColor: '#9B59B6' + '20' }]}>
-              <Ionicons name="diamond-outline" size={24} color="#9B59B6" />
-            </View>
-            <Text style={[styles.statValue, { color: colors.text }]}>{stats.premium}</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Premium
+              Masquees
             </Text>
           </View>
         </View>
